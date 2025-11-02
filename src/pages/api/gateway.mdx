@@ -1,0 +1,177 @@
+export const pageTitle = 'Gateway API'
+export const description = 'API документация для Localzet Cluster Gateway: методы, свойства, события, настройка шлюза.'
+export const keywords = 'localzet cluster gateway api, gateway class, gateway configuration, gateway methods'
+
+# Gateway API
+
+Gateway - это класс, который расширяет `localzet\Server` и обрабатывает клиентские соединения.
+
+## Создание экземпляра
+
+```php
+use localzet\Cluster\Gateway;
+
+$gateway = new Gateway("Websocket://0.0.0.0:7273", [], 'your-secret-key');
+```
+
+## Основные свойства
+
+### `$name`
+Имя Gateway процесса
+```php
+$gateway->name = 'ChatGateway';
+```
+
+### `$count`
+Количество процессов Gateway
+```php
+$gateway->count = 4;
+```
+
+### `$lanIp`
+IP-адрес локальной машины для внутренней коммуникации
+```php
+$gateway->lanIp = '127.0.0.1'; // По умолчанию
+```
+
+### `$startPort`
+Начальный порт для внутренней коммуникации между Gateway и Business Worker
+```php
+$gateway->startPort = 2800; // Каждый процесс использует startPort + id
+```
+
+### `$registerAddress`
+Адрес Register сервера
+```php
+$gateway->registerAddress = '127.0.0.1:1236';
+// Или массив адресов для репликации
+$gateway->registerAddress = ['127.0.0.1:1236', '127.0.0.1:1237'];
+```
+
+### `$pingInterval`
+Интервал отправки ping сообщений клиентам (секунды)
+```php
+$gateway->pingInterval = 10; // Отключено, если 0
+```
+
+### `$pingData`
+Данные для ping сообщения
+```php
+$gateway->pingData = '{"type":"ping"}';
+```
+
+### `$pingNotResponseLimit`
+Максимальное количество неотвеченных ping перед отключением клиента
+```php
+$gateway->pingNotResponseLimit = 2; // 0 = отключено
+```
+
+### `$secretKey`
+Секретный ключ для аутентификации
+```php
+$gateway->secretKey = 'your-secret-key-here';
+```
+
+### `$router`
+Функция маршрутизации сообщений к Business Worker
+```php
+// По умолчанию: привязка client_id к конкретному Business Worker
+$gateway->router = [Gateway::class, 'routerBind'];
+
+// Случайная маршрутизация
+$gateway->router = [Gateway::class, 'routerRand'];
+
+// Пользовательская функция
+$gateway->router = function($server_connections, $client_connection, $cmd, $buffer) {
+    // Вернуть TcpConnection к Business Worker
+};
+```
+
+## События
+
+### `onConnect`
+Вызывается при подключении клиента
+```php
+$gateway->onConnect = function($connection) {
+    // $connection - TcpConnection объект клиента
+    echo "Client connected: " . $connection->id . "\n";
+};
+```
+
+### `onMessage`
+Вызывается при получении сообщения от клиента
+```php
+$gateway->onMessage = function($connection, $data) {
+    echo "Message: " . $data . "\n";
+};
+```
+
+### `onClose`
+Вызывается при отключении клиента
+```php
+$gateway->onClose = function($connection) {
+    echo "Client disconnected: " . $connection->id . "\n";
+};
+```
+
+### `onBusinessConnected`
+Вызывается при подключении Business Worker к Gateway
+```php
+$gateway->onBusinessConnected = function($connection) {
+    echo "Business Worker connected\n";
+};
+```
+
+### `onBusinessClose`
+Вызывается при отключении Business Worker
+```php
+$gateway->onBusinessClose = function($connection) {
+    echo "Business Worker disconnected\n";
+};
+```
+
+## Методы роутинга
+
+### `routerBind` (по умолчанию)
+Привязывает client_id к конкретному Business Worker при первом сообщении. Все последующие сообщения от этого клиента идут к тому же Worker.
+
+### `routerRand`
+Случайная маршрутизация - каждый раз выбирается случайный Business Worker.
+
+## Пример использования
+
+```php
+<?php
+use localzet\Server;
+use localzet\Cluster\Gateway;
+
+require_once __DIR__ . '/vendor/autoload.php';
+
+$gateway = new Gateway("Websocket://0.0.0.0:7273");
+$gateway->name = 'ChatGateway';
+$gateway->count = 4;
+$gateway->lanIp = '127.0.0.1';
+$gateway->startPort = 2800;
+$gateway->pingInterval = 10;
+$gateway->pingData = '{"type":"ping"}';
+$gateway->registerAddress = '127.0.0.1:1236';
+$gateway->secretKey = 'secret123';
+
+$gateway->onConnect = function($connection) {
+    Server::log('Client connected: ' . $connection->id);
+};
+
+if (!defined('GLOBAL_START')) {
+    Server::runAll();
+}
+```
+
+## Внутренние порты
+
+Каждый Gateway процесс создает внутренний порт для связи с Business Worker'ами:
+- Процесс с `id = 0`: `startPort + 0` (например, 2800)
+- Процесс с `id = 1`: `startPort + 1` (например, 2801)
+- И так далее...
+
+Business Worker'ы подключаются к этим портам для получения событий от клиентов.
+

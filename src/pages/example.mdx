@@ -1,0 +1,427 @@
+export const pageTitle = 'Примеры использования'
+export const description = 'Практические примеры использования Localzet Cluster: простой чат, уведомления, группы, аутентификация.'
+export const keywords = 'localzet cluster examples, cluster chat example, cluster websocket example, cluster tutorial'
+
+# Примеры использования
+
+Практические примеры использования Localzet Cluster для различных сценариев.
+
+## Простой чат
+
+### Структура файлов
+
+```
+project/
+├── register.php
+├── gateway.php
+├── business.php
+├── Events.php
+└── start.php
+```
+
+### register.php
+
+```php
+<?php
+use localzet\Cluster\Register;
+
+require_once __DIR__ . '/vendor/autoload.php';
+
+$register = new Register('text://0.0.0.0:1236');
+$register->name = 'Register';
+$register->secretKey = 'chat-secret-key';
+
+if (!defined('GLOBAL_START')) {
+    \localzet\Server::runAll();
+}
+```
+
+### gateway.php
+
+```php
+<?php
+use localzet\Server;
+use localzet\Cluster\Gateway;
+
+require_once __DIR__ . '/vendor/autoload.php';
+
+$gateway = new Gateway("Websocket://0.0.0.0:7273");
+$gateway->name = 'ChatGateway';
+$gateway->count = 4;
+$gateway->lanIp = '127.0.0.1';
+$gateway->startPort = 2800;
+$gateway->pingInterval = 55;
+$gateway->pingData = '{"type":"ping"}';
+$gateway->registerAddress = '127.0.0.1:1236';
+$gateway->secretKey = 'chat-secret-key';
+
+if (!defined('GLOBAL_START')) {
+    Server::runAll();
+}
+```
+
+### Events.php
+
+```php
+<?php
+use localzet\Server;
+use localzet\Cluster\Lib\Gateway;
+
+class Events
+{
+    public static function onConnect($client_id)
+    {
+        Server::log("Client connected: $client_id");
+        Gateway::sendToClient($client_id, json_encode([
+            'type' => 'system',
+            'message' => 'Welcome to chat!'
+        ]));
+    }
+
+    public static function onMessage($client_id, $message)
+    {
+        $data = json_decode($message, true);
+        
+        if (!$data || !isset($data['type'])) {
+            return;
+        }
+        
+        switch ($data['type']) {
+            case 'join_room':
+                // Добавить в комнату
+                $room = $data['room'] ?? 'general';
+                Gateway::joinGroup($client_id, $room);
+                
+                Gateway::sendToClient($client_id, json_encode([
+                    'type' => 'system',
+                    'message' => "Joined room: $room"
+                ]));
+                
+                // Уведомить других в комнате
+                Gateway::sendToGroup($room, json_encode([
+                    'type' => 'user_joined',
+                    'client_id' => $client_id
+                ]), [$client_id]);
+                break;
+                
+            case 'leave_room':
+                $room = $data['room'] ?? 'general';
+                Gateway::leaveGroup($client_id, $room);
+                break;
+                
+            case 'message':
+                // Отправить сообщение в комнату
+                $room = $_SESSION['current_room'] ?? 'general';
+                Gateway::sendToGroup($room, json_encode([
+                    'type' => 'chat_message',
+                    'client_id' => $client_id,
+                    'message' => $data['message'],
+                    'timestamp' => time()
+                ]));
+                break;
+                
+            case 'private':
+                // Приватное сообщение
+                if (isset($data['target_uid'])) {
+                    Gateway::sendToUid($data['target_uid'], json_encode([
+                        'type' => 'private_message',
+                        'from_uid' => $_SESSION['uid'] ?? null,
+                        'message' => $data['message']
+                    ]));
+                }
+                break;
+        }
+    }
+
+    public static function onClose($client_id)
+    {
+        Server::log("Client disconnected: $client_id");
+        
+        // Уведомить о выходе из всех групп
+        $session = Gateway::getSession($client_id);
+        if ($session && isset($session['rooms'])) {
+            foreach ($session['rooms'] as $room) {
+                Gateway::sendToGroup($room, json_encode([
+                    'type' => 'user_left',
+                    'client_id' => $client_id
+                ]));
+            }
+        }
+    }
+}
+```
+
+### business.php
+
+```php
+<?php
+use localzet\Server;
+use localzet\Cluster\Business;
+
+require_once __DIR__ . '/vendor/autoload.php';
+require_once __DIR__ . '/Events.php';
+
+$worker = new Business();
+$worker->name = 'ChatBusinessWorker';
+$worker->count = 4;
+$worker->registerAddress = '127.0.0.1:1236';
+$worker->secretKey = 'chat-secret-key';
+$worker->eventHandler = 'Events';
+
+if (!defined('GLOBAL_START')) {
+    Server::runAll();
+}
+```
+
+### start.php
+
+```php
+<?php
+define('GLOBAL_START', 1);
+
+require_once __DIR__ . '/register.php';
+require_once __DIR__ . '/gateway.php';
+require_once __DIR__ . '/business.php';
+```
+
+### Запуск
+
+```bash
+php start.php start
+```
+
+## Чат с аутентификацией
+
+```php
+class Events
+{
+    public static function onConnect($client_id)
+    {
+        // Ожидаем токен аутентификации
+    }
+
+    public static function onMessage($client_id, $message)
+    {
+        $data = json_decode($message, true);
+        
+        if (!isset($_SESSION['authenticated'])) {
+            // Обработка аутентификации
+            if ($data['type'] === 'auth' && isset($data['token'])) {
+                $user = validateToken($data['token']); // Ваша функция
+                
+                if ($user) {
+                    $_SESSION['authenticated'] = true;
+                    $_SESSION['uid'] = $user['id'];
+                    $_SESSION['username'] = $user['username'];
+                    
+                    // Привязать к UID
+                    Gateway::bindUid($client_id, $user['id']);
+                    
+                    Gateway::sendToClient($client_id, json_encode([
+                        'type' => 'auth_success',
+                        'user' => $user
+                    ]));
+                } else {
+                    Gateway::sendToClient($client_id, json_encode([
+                        'type' => 'auth_error',
+                        'message' => 'Invalid token'
+                    ]));
+                    Gateway::closeClient($client_id);
+                }
+            }
+            return;
+        }
+        
+        // Обработка сообщений для аутентифицированных пользователей
+        switch ($data['type']) {
+            case 'message':
+                $room = $data['room'] ?? 'general';
+                Gateway::sendToGroup($room, json_encode([
+                    'type' => 'chat_message',
+                    'uid' => $_SESSION['uid'],
+                    'username' => $_SESSION['username'],
+                    'message' => $data['message'],
+                    'timestamp' => time()
+                ]));
+                break;
+        }
+    }
+
+    public static function onClose($client_id)
+    {
+        // Очистка данных пользователя при отключении
+    }
+}
+
+function validateToken($token)
+{
+    // Ваша логика проверки токена
+    // Например, проверка JWT или запрос в БД
+    return ['id' => 123, 'username' => 'john'];
+}
+```
+
+## Система уведомлений
+
+```php
+class Events
+{
+    public static function onMessage($client_id, $message)
+    {
+        $data = json_decode($message, true);
+        
+        if ($data['type'] === 'subscribe') {
+            // Подписка на уведомления по типу
+            $notificationType = $data['notification_type'];
+            Gateway::joinGroup($client_id, "notifications_$notificationType");
+            
+            Gateway::sendToClient($client_id, json_encode([
+                'type' => 'subscribed',
+                'notification_type' => $notificationType
+            ]));
+        }
+    }
+}
+
+// Внешнее приложение отправляет уведомления
+use localzet\Cluster\Client;
+
+Client::$registerAddress = '127.0.0.1:1236';
+Client::$secretKey = 'chat-secret-key';
+
+// Уведомление всем подписчикам
+Client::sendToGroup('notifications_system', json_encode([
+    'type' => 'notification',
+    'title' => 'System Update',
+    'message' => 'Server will restart in 5 minutes'
+]));
+
+// Уведомление конкретному пользователю
+$uid = 12345;
+Client::sendToUid($uid, json_encode([
+    'type' => 'notification',
+    'title' => 'New Message',
+    'message' => 'You have a new message'
+]));
+```
+
+## Игровой сервер
+
+```php
+class Events
+{
+    public static function onConnect($client_id)
+    {
+        // Инициализация игровой сессии
+        $_SESSION['game_state'] = 'lobby';
+        $_SESSION['score'] = 0;
+    }
+
+    public static function onMessage($client_id, $message)
+    {
+        $data = json_decode($message, true);
+        
+        switch ($data['action']) {
+            case 'join_game':
+                $gameId = $data['game_id'];
+                Gateway::joinGroup($client_id, "game_$gameId");
+                
+                $_SESSION['game_state'] = 'playing';
+                $_SESSION['game_id'] = $gameId;
+                
+                // Уведомить других игроков
+                Gateway::sendToGroup("game_$gameId", json_encode([
+                    'type' => 'player_joined',
+                    'client_id' => $client_id
+                ]), [$client_id]);
+                break;
+                
+            case 'game_action':
+                // Распространение игрового действия
+                $gameId = $_SESSION['game_id'];
+                Gateway::sendToGroup("game_$gameId", json_encode([
+                    'type' => 'game_action',
+                    'client_id' => $client_id,
+                    'action' => $data['action_data']
+                ]));
+                break;
+                
+            case 'update_score':
+                $_SESSION['score'] = $data['score'];
+                
+                // Отправить топ игроков
+                $topPlayers = getTopPlayers($_SESSION['game_id']);
+                Gateway::sendToClient($client_id, json_encode([
+                    'type' => 'leaderboard',
+                    'players' => $topPlayers
+                ]));
+                break;
+        }
+    }
+    
+    public static function onClose($client_id)
+    {
+        // Удалить из игры
+        if (isset($_SESSION['game_id'])) {
+            Gateway::leaveGroup($client_id, "game_{$_SESSION['game_id']}");
+            
+            Gateway::sendToGroup("game_{$_SESSION['game_id']}", json_encode([
+                'type' => 'player_left',
+                'client_id' => $client_id
+            ]));
+        }
+    }
+}
+```
+
+## Клиентский код (JavaScript)
+
+```javascript
+const ws = new WebSocket('ws://localhost:7273');
+
+ws.onopen = function() {
+    console.log('Connected');
+    
+    // Аутентификация
+    ws.send(JSON.stringify({
+        type: 'auth',
+        token: 'user-token-here'
+    }));
+};
+
+ws.onmessage = function(event) {
+    const data = JSON.parse(event.data);
+    
+    switch(data.type) {
+        case 'auth_success':
+            console.log('Authenticated:', data.user);
+            break;
+            
+        case 'chat_message':
+            displayMessage(data);
+            break;
+            
+        case 'notification':
+            showNotification(data.title, data.message);
+            break;
+    }
+};
+
+// Отправка сообщения
+function sendMessage(room, message) {
+    ws.send(JSON.stringify({
+        type: 'message',
+        room: room,
+        message: message
+    }));
+}
+
+// Присоединиться к комнате
+function joinRoom(room) {
+    ws.send(JSON.stringify({
+        type: 'join_room',
+        room: room
+    }));
+}
+```
+

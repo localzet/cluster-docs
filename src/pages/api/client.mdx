@@ -1,0 +1,301 @@
+export const pageTitle = 'Client API'
+export const description = 'API для внешних приложений: отправка сообщений клиентам, управление группами и сессиями, проверка статуса.'
+export const keywords = 'localzet cluster client api, cluster external api, send message to client, cluster groups, cluster sessions'
+
+# Client API
+
+Client API позволяет внешним приложениям взаимодействовать с Cluster для отправки сообщений клиентам и управления соединениями.
+
+## Настройка
+
+```php
+use localzet\Cluster\Client;
+
+Client::$registerAddress = '127.0.0.1:1236';
+Client::$secretKey = 'your-secret-key-here';
+Client::$connectTimeout = 3;
+Client::$persistentConnection = false;
+```
+
+## Отправка сообщений
+
+### Отправить клиенту
+
+```php
+Client::sendToClient($client_id, $message, $raw = false);
+```
+
+**Параметры:**
+- `$client_id` - ID клиента
+- `$message` - Сообщение для отправки
+- `$raw` - Отправить как raw данные (без кодирования протоколом)
+
+**Пример:**
+```php
+Client::sendToClient('00000000000000000001', 'Hello!');
+```
+
+### Отправить всем клиентам
+
+```php
+Client::sendToAll($message, $client_id_array = null, $exclude_client_id = null, $raw = false);
+```
+
+**Пример:**
+```php
+// Всем клиентам
+Client::sendToAll('Broadcast message');
+
+// Списку клиентов
+Client::sendToAll('Group message', ['client1', 'client2']);
+
+// Всем кроме некоторых
+Client::sendToAll('Message', null, ['client1']);
+```
+
+### Отправить по UID
+
+```php
+Client::sendToUid($uid, $message, $raw = false);
+```
+
+**Пример:**
+```php
+// Одному пользователю
+Client::sendToUid('user123', 'Hello!');
+
+// Нескольким пользователям
+Client::sendToUid(['user1', 'user2'], 'Group notification');
+```
+
+### Отправить группе
+
+```php
+Client::sendToGroup($group, $message, $exclude_client_id = null, $raw = false);
+```
+
+**Пример:**
+```php
+// Всем в группе
+Client::sendToGroup('room_1', 'New message in room');
+
+// Всем в группе кроме отправителя
+Client::sendToGroup('room_1', $message, [$sender_client_id]);
+```
+
+## Управление группами
+
+### Добавить в группу
+
+```php
+Client::joinGroup($client_id, $group);
+```
+
+### Удалить из группы
+
+```php
+Client::leaveGroup($client_id, $group);
+```
+
+### Распустить группу
+
+```php
+Client::ungroup($group);
+```
+
+**Пример:**
+```php
+// Добавить пользователя в комнату чата
+Client::joinGroup($client_id, 'chat_room_1');
+
+// Удалить из комнаты
+Client::leaveGroup($client_id, 'chat_room_1');
+
+// Распустить комнату
+Client::ungroup('chat_room_1');
+```
+
+## Управление UID
+
+### Привязать UID
+
+```php
+Client::bindUid($client_id, $uid);
+```
+
+### Отвязать UID
+
+```php
+Client::unbindUid($client_id, $uid);
+```
+
+**Пример:**
+```php
+// После успешной аутентификации
+Client::bindUid($client_id, $user_id);
+
+// При выходе пользователя
+Client::unbindUid($client_id, $user_id);
+```
+
+## Управление сессиями
+
+### Получить сессию
+
+```php
+$session = Client::getSession($client_id);
+// Возвращает массив или null, если клиент не найден
+```
+
+### Установить сессию
+
+```php
+Client::setSession($client_id, ['key' => 'value']);
+// Полная замена сессии
+```
+
+### Обновить сессию
+
+```php
+Client::updateSession($client_id, ['new_key' => 'value']);
+// Слияние с существующей сессией
+```
+
+**Пример:**
+```php
+// Получить данные пользователя
+$session = Client::getSession($client_id);
+$userId = $session['user_id'] ?? null;
+
+// Обновить данные
+Client::updateSession($client_id, [
+    'last_active' => time(),
+    'message_count' => 100
+]);
+```
+
+## Проверка статуса
+
+### Проверить онлайн статус
+
+```php
+$isOnline = Client::isOnline($client_id);
+// Возвращает 0 или 1
+```
+
+### Проверить онлайн по UID
+
+```php
+$isOnline = Client::isUidOnline($uid);
+// Возвращает 0 или 1
+```
+
+### Получить client_id по UID
+
+```php
+$client_ids = Client::getClientIdByUid($uid);
+// Возвращает массив client_id (один пользователь может иметь несколько соединений)
+```
+
+## Получение информации
+
+### Получить список всех клиентов
+
+```php
+$allClients = Client::getAllClientIdList();
+// Возвращает массив всех client_id
+```
+
+### Получить количество клиентов
+
+```php
+$count = Client::getAllClientCount();
+// Общее количество подключенных клиентов
+```
+
+### Получить клиентов группы
+
+```php
+$clients = Client::getClientIdListByGroup($group);
+// Возвращает массив client_id в группе
+```
+
+### Получить количество в группе
+
+```php
+$count = Client::getClientCountByGroup($group);
+```
+
+### Получить все сессии
+
+```php
+$sessions = Client::getAllClientSessions();
+// Возвращает массив: client_id => session
+```
+
+### Получить сессии группы
+
+```php
+$sessions = Client::getClientSessionsByGroup($group);
+```
+
+## Закрытие соединений
+
+### Закрыть клиента
+
+```php
+Client::closeClient($client_id, $message = null);
+// Отправляет сообщение и закрывает соединение
+```
+
+### Уничтожить соединение
+
+```php
+Client::destoryClient($client_id);
+// Немедленное закрытие без отправки сообщения
+```
+
+## Пример использования
+
+```php
+<?php
+require_once __DIR__ . '/vendor/autoload.php';
+
+use localzet\Cluster\Client;
+
+// Настройка
+Client::$registerAddress = '127.0.0.1:1236';
+Client::$secretKey = 'secret123';
+
+// Отправить уведомление пользователю
+$userId = 12345;
+if (Client::isUidOnline($userId)) {
+    $clientIds = Client::getClientIdByUid($userId);
+    foreach ($clientIds as $clientId) {
+        Client::sendToClient($clientId, json_encode([
+            'type' => 'notification',
+            'message' => 'You have a new message!'
+        ]));
+    }
+}
+
+// Отправить сообщение в группу
+Client::sendToGroup('chat_room_1', json_encode([
+    'type' => 'message',
+    'user' => 'Admin',
+    'text' => 'Server maintenance in 5 minutes'
+]));
+
+// Получить статистику
+$totalUsers = Client::getAllClientCount();
+$roomUsers = Client::getClientCountByGroup('chat_room_1');
+echo "Total: $totalUsers, In room: $roomUsers\n";
+```
+
+## Производительность
+
+- Client API использует синхронные соединения к Gateway
+- Для лучшей производительности используйте persistent connections
+- Множественные запросы можно выполнять параллельно через пул соединений
+- Рекомендуется кешировать списки Gateway адресов
+

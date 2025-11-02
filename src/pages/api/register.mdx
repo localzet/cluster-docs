@@ -1,0 +1,159 @@
+export const pageTitle = 'Register API'
+export const description = 'API документация для Localzet Cluster Register: настройка регистратора, service discovery, координация компонентов.'
+export const keywords = 'localzet cluster register api, register service discovery, cluster coordinator'
+
+# Register API
+
+Register обеспечивает service discovery и координацию между компонентами Cluster.
+
+## Создание экземпляра
+
+```php
+use localzet\Cluster\Register;
+
+$register = new Register('text://0.0.0.0:1236', [], 'your-secret-key');
+```
+
+## Основные свойства
+
+### `$name`
+Имя Register процесса
+```php
+$register->name = 'Register';
+```
+
+### `$secretKey`
+Секретный ключ для аутентификации
+```php
+$register->secretKey = 'your-secret-key-here';
+```
+
+**Важно:** Все компоненты (Gateway, Business Worker) должны использовать тот же `secretKey`.
+
+### Протокол
+
+Register использует текстовый протокол (`Text`) для простоты и надежности.
+
+## Автоматическая генерация ключа
+
+Если `secretKey` не указан, Register автоматически генерирует случайный ключ:
+
+```php
+$register = new Register('text://0.0.0.0:1236');
+// Ключ будет автоматически сгенерирован
+// Используйте $register->secretKey для получения сгенерированного ключа
+```
+
+## Пример использования
+
+```php
+<?php
+use localzet\Cluster\Register;
+
+require_once __DIR__ . '/vendor/autoload.php';
+
+$register = new Register('text://0.0.0.0:1236');
+$register->name = 'Register';
+$register->secretKey = 'my-secret-key-123';
+
+// Сохранить ключ для использования в других компонентах
+file_put_contents(__DIR__ . '/.secret', $register->secretKey);
+
+if (!defined('GLOBAL_START')) {
+    \localzet\Server::runAll();
+}
+```
+
+## Протокол обмена
+
+Register общается с компонентами через простой JSON протокол:
+
+### События от Gateway
+
+**gateway_connect:**
+```json
+{
+    "event": "gateway_connect",
+    "address": "127.0.0.1:2800",
+    "secret_key": "your-secret-key"
+}
+```
+
+### События от Business Worker
+
+**server_connect:**
+```json
+{
+    "event": "server_connect",
+    "secret_key": "your-secret-key"
+}
+```
+
+### Ответы от Register
+
+**broadcast_addresses:**
+```json
+{
+    "event": "broadcast_addresses",
+    "addresses": ["127.0.0.1:2800", "127.0.0.1:2801", "127.0.0.1:2802"]
+}
+```
+
+**ping:**
+```json
+{
+    "event": "ping"
+}
+```
+
+## Как это работает
+
+1. **Gateway регистрируется**: Gateway запускается и отправляет свой внутренний адрес в Register
+2. **Register хранит адреса**: Register сохраняет список всех Gateway адресов
+3. **Business Worker запрашивает адреса**: Business Worker подключается и получает список Gateway
+4. **Business Worker подключается**: Business Worker подключается ко всем Gateway для получения событий
+
+## Репликация
+
+Для высокой доступности можно запустить несколько Register процессов:
+
+```php
+// Register 1
+$register1 = new Register('text://0.0.0.0:1236');
+
+// Register 2
+$register2 = new Register('text://0.0.0.0:1237');
+
+// В Gateway и Business Worker укажите оба адреса
+$gateway->registerAddress = ['127.0.0.1:1236', '127.0.0.1:1237'];
+```
+
+## Безопасность
+
+- **Secret Key**: Обязательно используйте одинаковый `secretKey` во всех компонентах
+- **Сеть**: Размещайте Register во внутренней сети, недоступной извне
+- **Firewall**: Ограничьте доступ к Register порту только компонентам кластера
+
+## Мониторинг
+
+Register логирует все события подключения и отключения:
+
+- Подключение Gateway
+- Отключение Gateway
+- Подключение Business Worker
+- Ошибки аутентификации
+
+## Troubleshooting
+
+### Gateway не регистрируется
+
+- Проверьте, что `secretKey` совпадает
+- Проверьте сетевую доступность Register
+- Проверьте логи Register и Gateway
+
+### Business Worker не получает адреса Gateway
+
+- Убедитесь, что Gateway запущен и зарегистрирован
+- Проверьте логи Register
+- Проверьте `secretKey` в Business Worker
+

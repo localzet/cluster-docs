@@ -1,0 +1,225 @@
+export const pageTitle = 'Business Worker API'
+export const description = 'API документация для Localzet Cluster Business Worker: настройка, события, обработка сообщений.'
+export const keywords = 'localzet cluster business worker api, business class, business worker events, cluster business logic'
+
+# Business Worker API
+
+Business Worker обрабатывает бизнес-логику приложения и получает события от Gateway.
+
+## Создание экземпляра
+
+```php
+use localzet\Cluster\Business;
+
+$worker = new Business();
+```
+
+## Основные свойства
+
+### `$name`
+Имя Business Worker процесса
+```php
+$worker->name = 'ChatBusinessWorker';
+```
+
+### `$count`
+Количество процессов Business Worker
+```php
+$worker->count = 4;
+```
+
+### `$registerAddress`
+Адрес Register сервера
+```php
+$worker->registerAddress = '127.0.0.1:1236';
+// Или массив адресов
+$worker->registerAddress = ['127.0.0.1:1236', '127.0.0.1:1237'];
+```
+
+### `$secretKey`
+Секретный ключ для аутентификации
+```php
+$worker->secretKey = 'your-secret-key-here';
+```
+
+### `$eventHandler`
+Класс для обработки событий
+```php
+$worker->eventHandler = 'Events'; // По умолчанию
+```
+
+## События через класс Events
+
+Создайте класс `Events.php` для обработки событий:
+
+```php
+<?php
+use localzet\Server;
+use localzet\Cluster\Lib\Gateway;
+
+class Events
+{
+    public static function onServerStart($server)
+    {
+        Server::log('Business Worker started');
+    }
+
+    public static function onConnect($client_id)
+    {
+        Server::log("Client connected: $client_id");
+        
+        // Привязка к UID (например, после аутентификации)
+        // Gateway::bindUid($client_id, $uid);
+    }
+
+    public static function onMessage($client_id, $message)
+    {
+        Server::log("Message from $client_id: $message");
+        
+        // Обработка сообщения
+        $data = json_decode($message, true);
+        
+        if ($data && isset($data['type'])) {
+            switch ($data['type']) {
+                case 'chat':
+                    // Отправить сообщение всем в группе
+                    Gateway::sendToGroup('room_' . $data['room'], $message);
+                    break;
+                    
+                case 'private':
+                    // Отправить приватное сообщение
+                    Gateway::sendToUid($data['uid'], $message);
+                    break;
+            }
+        }
+    }
+
+    public static function onClose($client_id)
+    {
+        Server::log("Client disconnected: $client_id");
+        
+        // Очистка данных пользователя
+        // Можно получить сессию перед отключением
+        // $session = Gateway::getSession($client_id);
+    }
+
+    public static function onWebSocketConnect($client_id, $data)
+    {
+        // Обработка WebSocket handshake
+        // $data содержит информацию из $_GET, $_SERVER, $_COOKIE
+    }
+}
+```
+
+## Доступные переменные
+
+В обработчиках событий доступны следующие переменные:
+
+### `$_SERVER`
+Содержит информацию о соединении:
+- `REMOTE_ADDR` - IP клиента
+- `REMOTE_PORT` - Порт клиента
+- `GATEWAY_ADDR` - IP Gateway сервера
+- `GATEWAY_PORT` - Порт Gateway сервера
+- `GATEWAY_CLIENT_ID` - client_id
+
+### `$_SESSION`
+Сессия клиента (автоматически загружается и сохраняется)
+
+### `Context::$client_id`
+Текущий client_id (только в контексте обработки события)
+
+## Методы Gateway
+
+Business Worker может использовать методы Gateway для отправки сообщений:
+
+```php
+use localzet\Cluster\Lib\Gateway;
+
+// Отправить сообщение конкретному клиенту
+Gateway::sendToClient($client_id, $message);
+
+// Отправить сообщение всем клиентам
+Gateway::sendToAll($message);
+
+// Отправить сообщение группе
+Gateway::sendToGroup($group_id, $message);
+
+// Отправить сообщение по UID
+Gateway::sendToUid($uid, $message);
+
+// Получить сессию клиента
+$session = Gateway::getSession($client_id);
+
+// Установить сессию
+Gateway::setSession($client_id, ['key' => 'value']);
+
+// Обновить сессию (слияние)
+Gateway::updateSession($client_id, ['new_key' => 'value']);
+
+// Привязать client_id к UID
+Gateway::bindUid($client_id, $uid);
+
+// Отвязать client_id от UID
+Gateway::unbindUid($client_id, $uid);
+
+// Добавить клиента в группу
+Gateway::joinGroup($client_id, $group_id);
+
+// Удалить клиента из группы
+Gateway::leaveGroup($client_id, $group_id);
+
+// Проверить онлайн статус
+$isOnline = Gateway::isOnline($client_id);
+$isUidOnline = Gateway::isUidOnline($uid);
+```
+
+## Пример использования
+
+```php
+<?php
+use localzet\Server;
+use localzet\Cluster\Business;
+
+require_once __DIR__ . '/vendor/autoload.php';
+require_once __DIR__ . '/Events.php';
+
+$worker = new Business();
+$worker->name = 'ChatBusinessWorker';
+$worker->count = 4;
+$worker->registerAddress = '127.0.0.1:1236';
+$worker->secretKey = 'secret123';
+$worker->eventHandler = 'Events';
+
+if (!defined('GLOBAL_START')) {
+    Server::runAll();
+}
+```
+
+## Работа с сессиями
+
+Сессии автоматически загружаются и сохраняются:
+
+```php
+public static function onMessage($client_id, $message)
+{
+    // Сессия уже загружена в $_SESSION
+    
+    // Чтение данных
+    $userId = $_SESSION['user_id'] ?? null;
+    
+    // Запись данных
+    $_SESSION['last_message'] = $message;
+    $_SESSION['message_count'] = ($_SESSION['message_count'] ?? 0) + 1;
+    
+    // Сессия автоматически сохранится после обработки события
+}
+```
+
+## Производительность
+
+- Business Worker не имеет прямых соединений с клиентами
+- Все данные передаются через Gateway через оптимизированный бинарный протокол
+- Можно запускать множество процессов для параллельной обработки
+- Каждое сообщение маршрутизируется в один из доступных процессов
+

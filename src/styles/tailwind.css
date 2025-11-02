@@ -1,0 +1,32 @@
+@layer base {
+    /*:root {*/
+    /*  --shiki-color-text: theme('colors.white');*/
+    /*  --shiki-token-constant: theme('colors.violet.300');*/
+    /*  --shiki-token-string: theme('colors.emerald.300');*/
+    /*  --shiki-token-comment: theme('colors.zinc.500');*/
+    /*  --shiki-token-keyword: theme('colors.amber.300');*/
+    /*  --shiki-token-parameter: theme('colors.pink.300');*/
+    /*  --shiki-token-function: theme('colors.sky.300');*/
+    /*  --shiki-token-string-expression: theme('colors.emerald.300');*/
+    /*  --shiki-token-punctuation: theme('colors.zinc.200');*/
+    /*}*/
+    :root {
+        --shiki-color-text: #A9B7C6;
+        --shiki-token-constant: #9876AA;
+        --shiki-token-string: #6A8759;
+        --shiki-token-comment: #808080;
+        --shiki-token-keyword: #CC7832;
+        --shiki-token-parameter: #214283;
+        --shiki-token-function: #3B82F6;
+        --shiki-token-string-expression: #6A8759;
+        --shiki-token-punctuation: #A9B7C6;
+    }
+
+    [inert] ::-webkit-scrollbar {
+        display: none;
+    }
+}
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;

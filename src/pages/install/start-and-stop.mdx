@@ -1,0 +1,198 @@
+export const pageTitle = 'Запуск и остановка'
+export const description = 'Как запускать и останавливать Localzet Cluster: команды start, stop, restart, status, reload.'
+export const keywords = 'localzet cluster start, cluster stop, cluster restart, cluster commands, cluster status'
+
+# Запуск и остановка
+
+## Запуск кластера
+
+### Базовая команда
+
+```bash
+php start.php start
+```
+
+Запустит все компоненты кластера:
+- Register
+- Gateway
+- Business Worker
+
+### Запуск в фоновом режиме (daemon)
+
+```bash
+php start.php start -d
+```
+
+Или установить глобально:
+
+```php
+use localzet\Server;
+
+Server::$daemonize = true;
+Server::runAll();
+```
+
+## Остановка
+
+### Graceful остановка
+
+```bash
+php start.php stop
+```
+
+Все процессы завершаются корректно, завершая текущие соединения.
+
+### Немедленная остановка
+
+```bash
+php start.php stop -g
+```
+
+Принудительное завершение всех процессов.
+
+## Перезапуск
+
+### Graceful перезапуск
+
+```bash
+php start.php restart
+```
+
+Сначала graceful остановка, затем запуск.
+
+### Hot reload (без остановки)
+
+```bash
+php start.php reload
+```
+
+Перезапускает только Business Worker процессы без прерывания клиентских соединений.
+
+## Проверка статуса
+
+```bash
+php start.php status
+```
+
+Показывает:
+- Статус всех процессов
+- Количество соединений
+- Использование памяти
+- Время работы
+
+## Логи
+
+### Просмотр логов в реальном времени
+
+```bash
+php start.php status
+```
+
+Или просмотр файла логов:
+
+```bash
+tail -f runtime/logs/workerman.log
+```
+
+### Путь к логам
+
+По умолчанию логи сохраняются в:
+- `runtime/logs/` - для каждого процесса отдельный файл
+
+## Запуск отдельных компонентов
+
+### Только Register
+
+```bash
+php register.php start
+```
+
+### Только Gateway
+
+```bash
+php gateway.php start
+```
+
+### Только Business Worker
+
+```bash
+php business.php start
+```
+
+## Структура процессов
+
+После запуска создается следующая структура процессов:
+
+```
+Master Process (start.php)
+├── Register Process
+├── Gateway Master
+│   ├── Gateway Worker 0
+│   ├── Gateway Worker 1
+│   ├── Gateway Worker 2
+│   └── Gateway Worker 3
+└── Business Master
+    ├── Business Worker 0
+    ├── Business Worker 1
+    ├── Business Worker 2
+    └── Business Worker 3
+```
+
+## Сигналы
+
+### SIGUSR2 - Reload
+
+```bash
+kill -USR2 $(cat runtime/master.pid)
+```
+
+Graceful перезагрузка Business Worker процессов.
+
+### SIGTERM / SIGINT - Stop
+
+```bash
+kill -TERM $(cat runtime/master.pid)
+```
+
+Graceful остановка всех процессов.
+
+## Troubleshooting
+
+### Процесс не останавливается
+
+Если процесс не останавливается корректно:
+
+```bash
+# Найти PID
+ps aux | grep start.php
+
+# Принудительно завершить
+kill -9 <PID>
+```
+
+### Порт занят
+
+Если порт уже используется:
+
+```bash
+# Проверить использование порта
+netstat -tuln | grep 7273
+
+# Освободить порт или изменить конфигурацию
+```
+
+### Проверка соединений
+
+Проверить, что компоненты подключились друг к другу:
+
+```bash
+# Проверить Register
+netstat -tuln | grep 1236
+
+# Проверить Gateway
+netstat -tuln | grep 7273
+
+# Проверить внутренние порты Gateway
+netstat -tuln | grep 280
+```
+
