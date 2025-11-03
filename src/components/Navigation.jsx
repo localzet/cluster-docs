@@ -205,7 +205,7 @@ function NavigationGroup({ group, className }) {
   )
 }
 
-export function Navigation({ className, ...props }) {
+export function Navigation(props) {
   return (
     <nav {...props}>
       <ul role="list">
