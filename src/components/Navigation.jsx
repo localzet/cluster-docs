@@ -49,7 +49,7 @@ function NavLink({href, tag, active, isAnchorLink = false, children}) {
     )
 }
 
-const navigation = [
+export const navigation = [
     {
         title: 'Введение',
         links: [
