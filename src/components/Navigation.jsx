@@ -129,45 +129,74 @@ function ActivePageMarker({ group, pathname }) {
   )
 }
 
-function NavigationGroup({ group, pathname }) {
+function NavigationGroup({ group, className }) {
+  let isInsideMobileNavigation = useIsInsideMobileNavigation()
+  let [router, sections] = useInitialValue(
+    [useRouter(), useSectionStore((s) => s.sections)],
+    isInsideMobileNavigation
+  )
+
   let isActiveGroup =
-    group.links.findIndex((link) => link.href === pathname) !== -1
+    group.links.findIndex((link) => link.href === router.pathname) !== -1
 
   return (
-    <li>
-      <div
-        className={clsx(
-          'flex h-8 items-center',
-          isActiveGroup && 'text-slate-900 dark:text-white'
-        )}
+    <li className={clsx('relative mt-6', className)}>
+      <motion.h2
+        layout="position"
+        className="text-xs font-semibold text-slate-900 dark:text-white"
       >
-        <span className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-          {group.title}
-        </span>
-      </div>
+        {group.title}
+      </motion.h2>
       <div className="relative mt-3 pl-2">
-        <AnimatePresence initial={false}>
+        <AnimatePresence initial={!isInsideMobileNavigation}>
           {isActiveGroup && (
-            <VisibleSectionHighlight group={group} pathname={pathname} />
+            <VisibleSectionHighlight group={group} pathname={router.pathname} />
           )}
         </AnimatePresence>
-        <div className="absolute inset-y-0 left-2 w-px bg-slate-900/10 dark:bg-white/5" />
+        <motion.div
+          layout
+          className="absolute inset-y-0 left-2 w-px bg-slate-900/10 dark:bg-white/5"
+        />
         <AnimatePresence initial={false}>
           {isActiveGroup && (
-            <ActivePageMarker group={group} pathname={pathname} />
+            <ActivePageMarker group={group} pathname={router.pathname} />
           )}
         </AnimatePresence>
         <ul role="list" className="border-l border-transparent">
           {group.links.map((link) => (
-            <li key={link.href}>
-              <NavLink
-                href={link.href}
-                tag={link.tag}
-                active={link.href === pathname}
-              >
+            <motion.li key={link.href} layout="position" className="relative">
+              <NavLink href={link.href} active={link.href === router.pathname}>
                 {link.title}
               </NavLink>
-            </li>
+              <AnimatePresence mode="popLayout" initial={false}>
+                {link.href === router.pathname && sections.length > 0 && (
+                  <motion.ul
+                    role="list"
+                    initial={{ opacity: 0 }}
+                    animate={{
+                      opacity: 1,
+                      transition: { delay: 0.1 },
+                    }}
+                    exit={{
+                      opacity: 0,
+                      transition: { duration: 0.15 },
+                    }}
+                  >
+                    {sections.map((section) => (
+                      <li key={section.id}>
+                        <NavLink
+                          href={`${link.href}#${section.id}`}
+                          tag={section.tag}
+                          isAnchorLink
+                        >
+                          {section.title}
+                        </NavLink>
+                      </li>
+                    ))}
+                  </motion.ul>
+                )}
+              </AnimatePresence>
+            </motion.li>
           ))}
         </ul>
       </div>
