@@ -68,9 +68,9 @@ export const navigation = [
   {
     title: 'API',
     links: [
-      { title: 'Gateway', href: '/api/gateway' },
-      { title: 'Business Worker', href: '/api/business' },
-      { title: 'Client API', href: '/api/client' },
+      { title: 'Gateway', href: '/api-ref/gateway' },
+      { title: 'Business Worker', href: '/api-ref/business' },
+      { title: 'Client API', href: '/api-ref/client' },
     ],
   },
 ]
