@@ -233,7 +233,7 @@ export default function App({Component, pageProps}) {
                 />
             </Head>
 
-            <Script defer src="https://analytics.localzet.com/pixel/kVPOX8AON9L4UkO8"
+            <Script defer src="https://analytics.localzet.com/pixel/Q8HsjjbsqIOlwJNH"
                     data-ignore-dnt="true"/>
 
             <MDXProvider components={mdxComponents}>
