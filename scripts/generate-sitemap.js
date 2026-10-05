@@ -1,7 +1,11 @@
+// SPDX-FileCopyrightText: 2026 Ivan Zorin <creator@localzet.com>
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Source: https://github.com/localzet/cluster-docs
+
 const fs = require('fs');
 const path = require('path');
 
-const BASE_URL = 'https://server.localzet.com';
+const BASE_URL = 'https://cluster.localzet.com';
 const PAGES_DIR = path.join(__dirname, '../src/pages');
 const OUTPUT_FILE = path.join(__dirname, '../public/sitemap.xml');
 
@@ -112,3 +116,8 @@ function main() {
 
 main();
 
+
+const exportDirectory = path.join(__dirname, '../out');
+if (fs.existsSync(exportDirectory)) {
+    fs.copyFileSync(OUTPUT_FILE, path.join(exportDirectory, 'sitemap.xml'));
+}

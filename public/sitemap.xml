@@ -4,68 +4,68 @@
         xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9
         http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
   <url>
-    <loc>https://server.localzet.com/</loc>
-    <lastmod>2025-11-03T11:25:41.342Z</lastmod>
+    <loc>https://cluster.localzet.com/</loc>
+    <lastmod>2026-10-05T14:22:01.629Z</lastmod>
     <changefreq>daily</changefreq>
     <priority>1</priority>
   </url>
   <url>
-    <loc>https://server.localzet.com/api-ref/business</loc>
-    <lastmod>2025-11-03T11:25:41.342Z</lastmod>
+    <loc>https://cluster.localzet.com/api-ref/business</loc>
+    <lastmod>2026-10-05T14:22:01.629Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://server.localzet.com/api-ref/client</loc>
-    <lastmod>2025-11-03T11:25:41.342Z</lastmod>
+    <loc>https://cluster.localzet.com/api-ref/client</loc>
+    <lastmod>2026-10-05T14:22:01.629Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://server.localzet.com/api-ref/gateway</loc>
-    <lastmod>2025-11-03T11:25:41.342Z</lastmod>
+    <loc>https://cluster.localzet.com/api-ref/gateway</loc>
+    <lastmod>2026-10-05T14:22:01.629Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://server.localzet.com/api-ref/register</loc>
-    <lastmod>2025-11-03T11:25:41.342Z</lastmod>
+    <loc>https://cluster.localzet.com/api-ref/register</loc>
+    <lastmod>2026-10-05T14:22:01.629Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://server.localzet.com/architecture/overview</loc>
-    <lastmod>2025-11-03T11:25:41.342Z</lastmod>
+    <loc>https://cluster.localzet.com/architecture/overview</loc>
+    <lastmod>2026-10-05T14:22:01.629Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://server.localzet.com/example</loc>
-    <lastmod>2025-11-03T11:25:41.342Z</lastmod>
+    <loc>https://cluster.localzet.com/example</loc>
+    <lastmod>2026-10-05T14:22:01.629Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://server.localzet.com/install/install</loc>
-    <lastmod>2025-11-03T11:25:41.342Z</lastmod>
+    <loc>https://cluster.localzet.com/install/install</loc>
+    <lastmod>2026-10-05T14:22:01.629Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://server.localzet.com/install/requirement</loc>
-    <lastmod>2025-11-03T11:25:41.342Z</lastmod>
+    <loc>https://cluster.localzet.com/install/requirement</loc>
+    <lastmod>2026-10-05T14:22:01.629Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://server.localzet.com/install/start-and-stop</loc>
-    <lastmod>2025-11-03T11:25:41.342Z</lastmod>
+    <loc>https://cluster.localzet.com/install/start-and-stop</loc>
+    <lastmod>2026-10-05T14:22:01.629Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://server.localzet.com/must-read</loc>
-    <lastmod>2025-11-03T11:25:41.342Z</lastmod>
+    <loc>https://cluster.localzet.com/must-read</loc>
+    <lastmod>2026-10-05T14:22:01.629Z</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>
   </url>

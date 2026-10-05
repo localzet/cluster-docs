@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Ivan Zorin <creator@localzet.com>
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Source: https://github.com/localzet/cluster-docs
+
 import Head from 'next/head'
 import {Router, useRouter} from 'next/router'
 import {MDXProvider} from '@mdx-js/react'
@@ -28,15 +32,15 @@ export default function App({Component, pageProps}) {
                 <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1"/>
 
                 {router.pathname === '/' && (pageProps.title || pageProps.pageTitle) ? (
-                    <title>Localzet Server - Высокопроизводительный асинхронный PHP сервер | Документация</title>
+                    <title>Localzet Cluster - Gateway/Business Worker для PHP | Документация</title>
                 ) : (
-                    <title>{`${pageProps.pageTitle ?? pageProps.title} - Localzet Server | Документация`}</title>
+                    <title>{`${pageProps.pageTitle ?? pageProps.title} - Localzet Cluster | Документация`}</title>
                 )}
 
                 <meta name="title"
-                      content={(pageProps.pageTitle ?? pageProps.title) ? `${pageProps.pageTitle ?? pageProps.title} - Localzet Server | Документация` : 'Localzet Server - Высокопроизводительный асинхронный PHP сервер | Документация'}/>
+                      content={(pageProps.pageTitle ?? pageProps.title) ? `${pageProps.pageTitle ?? pageProps.title} - Localzet Cluster | Документация` : 'Localzet Cluster - Gateway/Business Worker для PHP | Документация'}/>
                 <meta name="description"
-                      content={pageProps.description ?? 'Localzet Server — высокопроизводительный асинхронный event-driven сервер для PHP. Документация по архитектуре, установке, разработке приложений с поддержкой WebSocket, HTTP, TCP/UDP протоколов. Master-Worker архитектура, многопроцессорность, долгосрочные соединения.'}/>
+                      content={pageProps.description ?? 'Localzet Cluster — распределённая система Gateway/Business Worker для PHP на Localzet Server 4.x. Документация по архитектуре, установке, разработке приложений с поддержкой WebSocket, HTTP, TCP/UDP протоколов. Master-Worker архитектура, многопроцессорность, долгосрочные соединения.'}/>
                 
                 {/* Enhanced keywords for better discoverability */}
                 <meta name="keywords" 
@@ -54,37 +58,37 @@ export default function App({Component, pageProps}) {
                 {/* Open Graph - Fixed property names */}
                 <meta property="og:locale" content="ru_RU"/>
                 <meta property="og:type" content={router.pathname === '/' ? 'website' : 'article'}/>
-                <meta property="og:url" content={`https://server.localzet.com${router.asPath}`}/>
-                <meta property="og:site_name" content="Localzet Server Documentation"/>
+                <meta property="og:url" content={`https://cluster.localzet.com${router.asPath}`}/>
+                <meta property="og:site_name" content="Localzet Cluster Documentation"/>
                 <meta property="og:title"
-                      content={(pageProps.pageTitle ?? pageProps.title) ? `${pageProps.pageTitle ?? pageProps.title} - Localzet Server` : 'Localzet Server - Высокопроизводительный асинхронный PHP сервер'}/>
+                      content={(pageProps.pageTitle ?? pageProps.title) ? `${pageProps.pageTitle ?? pageProps.title} - Localzet Cluster` : 'Localzet Cluster - Gateway/Business Worker для PHP'}/>
                 <meta property="og:description"
-                      content={pageProps.description ?? 'Localzet Server — высокопроизводительный асинхронный event-driven сервер для PHP. Полная документация по архитектуре, установке, разработке приложений с поддержкой WebSocket, HTTP, TCP/UDP протоколов.'}/>
+                      content={pageProps.description ?? 'Localzet Cluster — распределённая система Gateway/Business Worker для PHP на Localzet Server 4.x. Полная документация по архитектуре, установке, разработке приложений с поддержкой WebSocket, HTTP, TCP/UDP протоколов.'}/>
                 <meta property="og:image"
-                      content={`https://cover.pr-cy.io/api/og?logo=${encodeURIComponent('https://server.localzet.com/favicon.png')}&bgColor=0f172a&color=E6E7E8&title=${encodeURIComponent(pageProps.title ?? 'Localzet Server')}&category=${encodeURIComponent('Документация - Localzet Server')}`}/>
+                      content={`https://cover.pr-cy.io/api/og?logo=${encodeURIComponent('https://cluster.localzet.com/favicon.png')}&bgColor=0f172a&color=E6E7E8&title=${encodeURIComponent(pageProps.title ?? 'Localzet Cluster')}&category=${encodeURIComponent('Документация - Localzet Cluster')}`}/>
                 <meta property="og:image:type" content="image/png"/>
                 <meta property="og:image:width" content="1200"/>
                 <meta property="og:image:height" content="630"/>
-                <meta property="og:image:alt" content={`${pageProps.pageTitle ?? pageProps.title ?? 'Localzet Server'} - Документация`}/>
+                <meta property="og:image:alt" content={`${pageProps.pageTitle ?? pageProps.title ?? 'Localzet Cluster'} - Документация`}/>
 
                 {/* Twitter Card */}
                 <meta name="twitter:card" content="summary_large_image"/>
                 <meta name="twitter:creator" content="@localzet"/>
                 <meta name="twitter:site" content="@localzet"/>
-                <meta name="twitter:url" content={`https://server.localzet.com${router.asPath}`}/>
+                <meta name="twitter:url" content={`https://cluster.localzet.com${router.asPath}`}/>
                 <meta name="twitter:title"
-                      content={(pageProps.pageTitle ?? pageProps.title) ? `${pageProps.pageTitle ?? pageProps.title} - Localzet Server` : 'Localzet Server - Высокопроизводительный асинхронный PHP сервер'}/>
+                      content={(pageProps.pageTitle ?? pageProps.title) ? `${pageProps.pageTitle ?? pageProps.title} - Localzet Cluster` : 'Localzet Cluster - Gateway/Business Worker для PHP'}/>
                 <meta name="twitter:description"
-                      content={pageProps.description ?? 'Localzet Server — высокопроизводительный асинхронный event-driven сервер для PHP. Полная документация по архитектуре, установке и разработке.'}/>
+                      content={pageProps.description ?? 'Localzet Cluster — распределённая система Gateway/Business Worker для PHP на Localzet Server 4.x. Полная документация по архитектуре, установке и разработке.'}/>
                 <meta name="twitter:image"
-                      content={`https://cover.pr-cy.io/api/og?logo=${encodeURIComponent('https://server.localzet.com/favicon.png')}&bgColor=0f172a&color=E6E7E8&title=${encodeURIComponent(pageProps.title ?? 'Localzet Server')}&category=${encodeURIComponent('Документация - Localzet Server')}`}/>
-                <meta name="twitter:image:alt" content={`${pageProps.pageTitle ?? pageProps.title ?? 'Localzet Server'} - Документация`}/>
+                      content={`https://cover.pr-cy.io/api/og?logo=${encodeURIComponent('https://cluster.localzet.com/favicon.png')}&bgColor=0f172a&color=E6E7E8&title=${encodeURIComponent(pageProps.title ?? 'Localzet Cluster')}&category=${encodeURIComponent('Документация - Localzet Cluster')}`}/>
+                <meta name="twitter:image:alt" content={`${pageProps.pageTitle ?? pageProps.title ?? 'Localzet Cluster'} - Документация`}/>
 
                 {/* Apple */}
                 <meta name="apple-mobile-web-app-capable" content="yes"/>
                 <meta name="apple-touch-fullscreen" content="yes"/>
                 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
-                <meta name="apple-mobile-web-app-title" content="Localzet Server"/>
+                <meta name="apple-mobile-web-app-title" content="Localzet Cluster"/>
                 <meta name="format-detection" content="telephone=no"/>
 
                 {/* Author and Copyright */}
@@ -96,9 +100,9 @@ export default function App({Component, pageProps}) {
                 <meta name="designer" content="Ivan Zorin <creator@localzet.com>"/>
 
                 {/* Application */}
-                <meta name="application-name" content="Localzet Server"/>
+                <meta name="application-name" content="Localzet Cluster"/>
                 <meta name="subject"
-                      content="Localzet Server — высокопроизводительный асинхронный event-driven сервер для PHP с поддержкой WebSocket, HTTP, TCP/UDP протоколов, Master-Worker архитектурой и многопроцессорностью"/>
+                      content="Localzet Cluster — распределённая система Gateway/Business Worker для PHP на Localzet Server 4.x с поддержкой WebSocket, HTTP, TCP/UDP протоколов, Master-Worker архитектурой и многопроцессорностью"/>
                 <meta name="generator" content="Next.js 15"/>
                 <meta name="category" content="Software, Programming, PHP, Server, Async, WebSocket"/>
 
@@ -107,11 +111,11 @@ export default function App({Component, pageProps}) {
                 <meta name="theme-color" media="(prefers-color-scheme: light)" content="#E6E7E8"/>
 
                 {/* Icons and Links */}
-                <link rel="icon" type="image/png" href="https://server.localzet.com/favicon.png"/>
-                <link rel="canonical" href={`https://server.localzet.com${router.asPath}`}/>
-                <link rel="alternate" hrefLang="ru" href={`https://server.localzet.com${router.asPath}`}/>
-                <link rel="alternate" hrefLang="en" href={`https://server.localzet.com${router.asPath}`}/>
-                <link rel="alternate" hrefLang="x-default" href={`https://server.localzet.com${router.asPath}`}/>
+                <link rel="icon" type="image/png" href="https://cluster.localzet.com/favicon.png"/>
+                <link rel="canonical" href={`https://cluster.localzet.com${router.asPath}`}/>
+                <link rel="alternate" hrefLang="ru" href={`https://cluster.localzet.com${router.asPath}`}/>
+                <link rel="alternate" hrefLang="en" href={`https://cluster.localzet.com${router.asPath}`}/>
+                <link rel="alternate" hrefLang="x-default" href={`https://cluster.localzet.com${router.asPath}`}/>
                 
                 {/* Preconnect for performance */}
                 <link rel="preconnect" href="https://fonts.googleapis.com"/>
@@ -122,12 +126,12 @@ export default function App({Component, pageProps}) {
                     type="application/ld+json"
                     dangerouslySetInnerHTML={{
                         __html: (() => {
-                            const currentUrl = `https://server.localzet.com${router.asPath}`;
+                            const currentUrl = `https://cluster.localzet.com${router.asPath}`;
                             const breadcrumbItems = [{
                                 "@type": "ListItem",
                                 "position": 1,
                                 "name": "Главная",
-                                "item": "https://server.localzet.com/"
+                                "item": "https://cluster.localzet.com/"
                             }];
                             if (router.asPath !== '/') {
                                 breadcrumbItems.push({
@@ -143,14 +147,14 @@ export default function App({Component, pageProps}) {
                                 "@graph": [
                                     {
                                         "@type": "SoftwareApplication",
-                                        "@id": "https://server.localzet.com/#software",
-                                        "name": "Localzet Server",
+                                        "@id": "https://cluster.localzet.com/#software",
+                                        "name": "Localzet Cluster",
                                         "applicationCategory": "ServerApplication",
                                         "operatingSystem": "Linux, Windows, macOS",
                                         "programmingLanguage": "PHP",
                                         "softwareVersion": "4.5",
                                         "description": "Высокопроизводительный асинхронный event-driven сервер для PHP с поддержкой WebSocket, HTTP, TCP/UDP протоколов, Master-Worker архитектурой и многопроцессорностью",
-                                        "url": "https://server.localzet.com",
+                                        "url": "https://cluster.localzet.com",
                                         "downloadUrl": "https://packagist.org/packages/localzet/server",
                                         "author": {
                                             "@type": "Person",
@@ -177,47 +181,47 @@ export default function App({Component, pageProps}) {
                                     },
                                     {
                                         "@type": "WebSite",
-                                        "@id": "https://server.localzet.com/#website",
-                                        "url": "https://server.localzet.com",
-                                        "name": "Localzet Server Documentation",
-                                        "description": "Полная документация по Localzet Server - высокопроизводительному асинхронному PHP серверу",
+                                        "@id": "https://cluster.localzet.com/#website",
+                                        "url": "https://cluster.localzet.com",
+                                        "name": "Localzet Cluster Documentation",
+                                        "description": "Полная документация по Localzet Cluster - высокопроизводительному асинхронному PHP серверу",
                                         "publisher": {
-                                            "@id": "https://server.localzet.com/#organization"
+                                            "@id": "https://cluster.localzet.com/#organization"
                                         },
                                         "inLanguage": ["ru", "en"],
                                         "potentialAction": {
                                             "@type": "SearchAction",
                                             "target": {
                                                 "@type": "EntryPoint",
-                                                "urlTemplate": "https://server.localzet.com?q={search_term_string}"
+                                                "urlTemplate": "https://cluster.localzet.com?q={search_term_string}"
                                             },
                                             "query-input": "required name=search_term_string"
                                         }
                                     },
                                     {
                                         "@type": "Organization",
-                                        "@id": "https://server.localzet.com/#organization",
+                                        "@id": "https://cluster.localzet.com/#organization",
                                         "name": "Localzet Group",
                                         "url": "https://www.localzet.com",
-                                        "logo": "https://server.localzet.com/favicon.png"
+                                        "logo": "https://cluster.localzet.com/favicon.png"
                                     },
                                     {
                                         "@type": "TechArticle",
                                         "@id": `${currentUrl}#article`,
-                                        "headline": pageProps.pageTitle ?? pageProps.title ?? "Localzet Server Documentation",
-                                        "description": pageProps.description ?? "Документация по Localzet Server",
+                                        "headline": pageProps.pageTitle ?? pageProps.title ?? "Localzet Cluster Documentation",
+                                        "description": pageProps.description ?? "Документация по Localzet Cluster",
                                         "author": {
-                                            "@id": "https://server.localzet.com/#organization"
+                                            "@id": "https://cluster.localzet.com/#organization"
                                         },
                                         "publisher": {
-                                            "@id": "https://server.localzet.com/#organization"
+                                            "@id": "https://cluster.localzet.com/#organization"
                                         },
                                         "inLanguage": "ru",
                                         "isAccessibleForFree": true,
                                         "keywords": pageProps.keywords || "localzet server, php, async, websocket, event-driven",
                                         "about": {
                                             "@type": "Thing",
-                                            "name": "Localzet Server",
+                                            "name": "Localzet Cluster",
                                             "description": "Асинхронный event-driven сервер для PHP"
                                         }
                                     },

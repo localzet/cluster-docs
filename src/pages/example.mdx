@@ -4,6 +4,9 @@ export const keywords = 'localzet cluster examples, cluster chat example, cluste
 
 # Примеры использования
 
+В примерах `$clusterSecret` задаётся проверенным общим конфигом из [инструкции установки](/install/install#obschiy-sekret). Не используйте пустые или шаблонные ключи.
+
+
 Практические примеры использования Localzet Cluster для различных сценариев.
 
 ## Простой чат
@@ -25,11 +28,11 @@ project/
 <?php
 use localzet\Cluster\Register;
 
-require_once __DIR__ . '/vendor/autoload.php';
+require_once __DIR__ . '/cluster-config.php';
 
-$register = new Register('text://0.0.0.0:1236');
+$register = new Register('text://127.0.0.1:1236');
 $register->name = 'Register';
-$register->secretKey = 'chat-secret-key';
+$register->secretKey = $clusterSecret;
 
 if (!defined('GLOBAL_START')) {
     \localzet\Server::runAll();
@@ -43,9 +46,9 @@ if (!defined('GLOBAL_START')) {
 use localzet\Server;
 use localzet\Cluster\Gateway;
 
-require_once __DIR__ . '/vendor/autoload.php';
+require_once __DIR__ . '/cluster-config.php';
 
-$gateway = new Gateway("Websocket://0.0.0.0:7273");
+$gateway = new Gateway("websocket://127.0.0.1:7273");
 $gateway->name = 'ChatGateway';
 $gateway->count = 4;
 $gateway->lanIp = '127.0.0.1';
@@ -53,7 +56,7 @@ $gateway->startPort = 2800;
 $gateway->pingInterval = 55;
 $gateway->pingData = '{"type":"ping"}';
 $gateway->registerAddress = '127.0.0.1:1236';
-$gateway->secretKey = 'chat-secret-key';
+$gateway->secretKey = $clusterSecret;
 
 if (!defined('GLOBAL_START')) {
     Server::runAll();
@@ -158,14 +161,14 @@ class Events
 use localzet\Server;
 use localzet\Cluster\Business;
 
-require_once __DIR__ . '/vendor/autoload.php';
+require_once __DIR__ . '/cluster-config.php';
 require_once __DIR__ . '/Events.php';
 
 $worker = new Business();
 $worker->name = 'ChatBusinessWorker';
 $worker->count = 4;
 $worker->registerAddress = '127.0.0.1:1236';
-$worker->secretKey = 'chat-secret-key';
+$worker->secretKey = $clusterSecret;
 $worker->eventHandler = 'Events';
 
 if (!defined('GLOBAL_START')) {
@@ -287,7 +290,7 @@ class Events
 use localzet\Cluster\Client;
 
 Client::$registerAddress = '127.0.0.1:1236';
-Client::$secretKey = 'chat-secret-key';
+Client::$secretKey = $clusterSecret;
 
 // Уведомление всем подписчикам
 Client::sendToGroup('notifications_system', json_encode([

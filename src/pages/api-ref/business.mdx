@@ -4,6 +4,9 @@ export const keywords = 'localzet cluster business worker api, business class, b
 
 # Business Worker API
 
+В примерах `$clusterSecret` задаётся проверенным общим конфигом из [инструкции установки](/install/install#obschiy-sekret). Не используйте пустые или шаблонные ключи.
+
+
 Business Worker обрабатывает бизнес-логику приложения и получает события от Gateway.
 
 ## Создание экземпляра
@@ -39,7 +42,7 @@ $worker->registerAddress = ['127.0.0.1:1236', '127.0.0.1:1237'];
 ### `$secretKey`
 Секретный ключ для аутентификации
 ```php
-$worker->secretKey = 'your-secret-key-here';
+$worker->secretKey = $clusterSecret;
 ```
 
 ### `$eventHandler`
@@ -181,7 +184,7 @@ $isUidOnline = Gateway::isUidOnline($uid);
 use localzet\Server;
 use localzet\Cluster\Business;
 
-require_once __DIR__ . '/vendor/autoload.php';
+require_once __DIR__ . '/cluster-config.php';
 require_once __DIR__ . '/Events.php';
 
 $worker = new Business();

@@ -4,6 +4,9 @@ export const keywords = 'localzet cluster register api, register service discove
 
 # Register API
 
+В примерах `$clusterSecret` задаётся проверенным общим конфигом из [инструкции установки](/install/install#obschiy-sekret). Не используйте пустые или шаблонные ключи.
+
+
 Register обеспечивает service discovery и координацию между компонентами Cluster.
 
 ## Создание экземпляра
@@ -11,7 +14,7 @@ Register обеспечивает service discovery и координацию м
 ```php
 use localzet\Cluster\Register;
 
-$register = new Register('text://0.0.0.0:1236', [], 'your-secret-key');
+$register = new Register('text://127.0.0.1:1236', [], $clusterSecret);
 ```
 
 ## Основные свойства
@@ -25,7 +28,7 @@ $register->name = 'Register';
 ### `$secretKey`
 Секретный ключ для аутентификации
 ```php
-$register->secretKey = 'your-secret-key-here';
+$register->secretKey = $clusterSecret;
 ```
 
 **Важно:** Все компоненты (Gateway, Business Worker) должны использовать тот же `secretKey`.
@@ -39,7 +42,7 @@ Register использует текстовый протокол (`Text`) дл�
 Если `secretKey` не указан, Register автоматически генерирует случайный ключ:
 
 ```php
-$register = new Register('text://0.0.0.0:1236');
+$register = new Register('text://127.0.0.1:1236');
 // Ключ будет автоматически сгенерирован
 // Используйте $register->secretKey для получения сгенерированного ключа
 ```
@@ -50,14 +53,13 @@ $register = new Register('text://0.0.0.0:1236');
 <?php
 use localzet\Cluster\Register;
 
-require_once __DIR__ . '/vendor/autoload.php';
+require_once __DIR__ . '/cluster-config.php';
 
-$register = new Register('text://0.0.0.0:1236');
+$register = new Register('text://127.0.0.1:1236');
 $register->name = 'Register';
-$register->secretKey = 'my-secret-key-123';
+$register->secretKey = $clusterSecret;
 
-// Сохранить ключ для использования в других компонентах
-file_put_contents(__DIR__ . '/.secret', $register->secretKey);
+// Provision the same environment secret on every node.
 
 if (!defined('GLOBAL_START')) {
     \localzet\Server::runAll();
@@ -113,18 +115,18 @@ Register общается с компонентами через простой 
 3. **Business Worker запрашивает адреса**: Business Worker подключается и получает список Gateway
 4. **Business Worker подключается**: Business Worker подключается ко всем Gateway для получения событий
 
-## Репликация
+## Несколько Register
 
-Для высокой доступности можно запустить несколько Register процессов:
+Можно указать несколько процессов service discovery. Этот пример не подтверждает отказоустойчивость: переключение и восстановление соединений требуют отдельного интеграционного теста.
 
 ```php
 // Register 1
-$register1 = new Register('text://0.0.0.0:1236');
+$register1 = new Register('text://127.0.0.1:1236', [], $clusterSecret);
 
 // Register 2
-$register2 = new Register('text://0.0.0.0:1237');
+$register2 = new Register('text://127.0.0.1:1237', [], $clusterSecret);
 
-// В Gateway и Business Worker укажите оба адреса
+// Configure both addresses on Gateway and Business Worker.
 $gateway->registerAddress = ['127.0.0.1:1236', '127.0.0.1:1237'];
 ```
 
@@ -136,12 +138,7 @@ $gateway->registerAddress = ['127.0.0.1:1236', '127.0.0.1:1237'];
 
 ## Мониторинг
 
-Register логирует все события подключения и отключения:
-
-- Подключение Gateway
-- Отключение Gateway
-- Подключение Business Worker
-- Ошибки аутентификации
+Для диагностики используйте журнал процессов Server и состояние соединений. Полного журнала всех событий регистрации в текущей реализации нет. Не записывайте общий ключ или полные сообщения регистрации в логи.
 
 ## Troubleshooting
 

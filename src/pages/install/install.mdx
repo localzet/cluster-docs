@@ -6,10 +6,33 @@ Localzet Cluster устанавливается через Composer:
 composer require localzet/cluster
 ```
 
+## Общий секрет
+
+Перед запуском примера задайте секрет не короче 32 байт:
+
+```sh
+export LOCALZET_CLUSTER_SECRET="$(php -r 'echo bin2hex(random_bytes(32));')"
+```
+
+Создайте общий файл `cluster-config.php`:
+
+```php
+<?php
+
+require_once __DIR__ . '/vendor/autoload.php';
+
+$clusterSecret = getenv('LOCALZET_CLUSTER_SECRET');
+if (!is_string($clusterSecret) || strlen($clusterSecret) < 32) {
+    throw new RuntimeException('LOCALZET_CLUSTER_SECRET must contain at least 32 bytes.');
+}
+```
+
+На всех узлах должен быть один секрет из защищённого окружения. Не сохраняйте его в Git и не используйте шаблонные ключи. Общий секрет не шифрует транспорт; внутренние порты должны оставаться в доверенной сети. Готовые примеры текущего репозитория Cluster проверяют длину секрета при запуске.
+
 ## Требования
 
 - PHP >= 8.2
-- Localzet Server >= 4.2
+- Localzet Server ^4.2 (ветка 4.x; совместимость с 7.x не подтверждена)
 - Расширения PHP: sockets, pcntl, posix, json
 
 ## Структура проекта
@@ -31,11 +54,11 @@ composer require localzet/cluster
 <?php
 use localzet\Cluster\Register;
 
-require_once __DIR__ . '/vendor/autoload.php';
+require_once __DIR__ . '/cluster-config.php';
 
-$register = new Register('text://0.0.0.0:1236');
+$register = new Register('text://127.0.0.1:1236');
 $register->name = 'Register';
-$register->secretKey = 'your-secret-key-here';
+$register->secretKey = $clusterSecret;
 
 if (!defined('GLOBAL_START')) {
     \localzet\Server::runAll();
@@ -51,9 +74,9 @@ if (!defined('GLOBAL_START')) {
 use localzet\Server;
 use localzet\Cluster\Gateway;
 
-require_once __DIR__ . '/vendor/autoload.php';
+require_once __DIR__ . '/cluster-config.php';
 
-$gateway = new Gateway("Websocket://0.0.0.0:7273");
+$gateway = new Gateway("websocket://127.0.0.1:7273");
 $gateway->name = 'ChatGateway';
 $gateway->count = 4;
 $gateway->lanIp = '127.0.0.1';
@@ -61,7 +84,7 @@ $gateway->startPort = 2800;
 $gateway->pingInterval = 10;
 $gateway->pingData = '{"type":"ping"}';
 $gateway->registerAddress = '127.0.0.1:1236';
-$gateway->secretKey = 'your-secret-key-here';
+$gateway->secretKey = $clusterSecret;
 
 if (!defined('GLOBAL_START')) {
     Server::runAll();
@@ -77,14 +100,14 @@ if (!defined('GLOBAL_START')) {
 use localzet\Server;
 use localzet\Cluster\Business;
 
-require_once __DIR__ . '/vendor/autoload.php';
+require_once __DIR__ . '/cluster-config.php';
 require_once __DIR__ . '/Events.php';
 
 $worker = new Business();
 $worker->name = 'ChatBusinessWorker';
 $worker->count = 4;
 $worker->registerAddress = '127.0.0.1:1236';
-$worker->secretKey = 'your-secret-key-here';
+$worker->secretKey = $clusterSecret;
 $worker->eventHandler = 'Events';
 
 if (!defined('GLOBAL_START')) {

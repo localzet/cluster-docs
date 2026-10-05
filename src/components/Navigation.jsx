@@ -1,4 +1,8 @@
-import { useRef } from 'react'
+// SPDX-FileCopyrightText: 2026 Ivan Zorin <creator@localzet.com>
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Source: https://github.com/localzet/cluster-docs
+
+import { useState } from 'react'
 import Link from 'next/link'
 import clsx from 'clsx'
 import { AnimatePresence, motion, useIsPresent } from 'framer-motion'
@@ -9,7 +13,7 @@ import { remToPx } from '@/lib/remToPx'
 import {useRouter} from "next/router";
 
 function useInitialValue(value, condition = true) {
-  let initialValue = useRef(value).current
+  let [initialValue] = useState(() => value)
   return condition ? initialValue : value
 }
 

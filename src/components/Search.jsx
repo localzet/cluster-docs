@@ -1,10 +1,27 @@
-import {forwardRef, Fragment, useEffect, useId, useRef, useState} from 'react'
+// SPDX-FileCopyrightText: 2026 Ivan Zorin <creator@localzet.com>
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Source: https://github.com/localzet/cluster-docs
+
+import {forwardRef, Fragment, useEffect, useId, useRef, useState, useSyncExternalStore} from 'react'
 import {useRouter} from 'next/router'
 import {createAutocomplete} from '@algolia/autocomplete-core'
 import {Dialog, Transition} from '@headlessui/react'
 import clsx from 'clsx'
 import {navigation} from '@/components/Navigation'
 import Highlighter from 'react-highlight-words'
+
+
+function subscribeToPlatform() {
+  return () => {}
+}
+
+function getModifierKey() {
+  return /(Mac|iPhone|iPod|iPad)/i.test(navigator.platform) ? '⌘' : 'Ctrl '
+}
+
+function getServerModifierKey() {
+  return ''
+}
 
 function useAutocomplete() {
   let id = useId()
@@ -244,13 +261,7 @@ const SearchInput = forwardRef(function SearchInput(
 })
 
 function SearchButton(props) {
-  let [modifierKey, setModifierKey] = useState()
-
-  useEffect(() => {
-    setModifierKey(
-      /(Mac|iPhone|iPod|iPad)/i.test(navigator.platform) ? '⌘' : 'Ctrl '
-    )
-  }, [])
+  let modifierKey = useSyncExternalStore(subscribeToPlatform, getModifierKey, getServerModifierKey)
 
   return (
     <>
@@ -282,7 +293,7 @@ function SearchDialog({open, setOpen, className}) {
   let router = useRouter()
   let formRef = useRef()
   let panelRef = useRef()
-  let inputRef = useRef()
+  let [inputElement, setInputElement] = useState(null)
   let {autocomplete, autocompleteState} = useAutocomplete()
 
   useEffect(() => {
@@ -360,11 +371,11 @@ function SearchDialog({open, setOpen, className}) {
                 <form
                   ref={formRef}
                   {...autocomplete.getFormProps({
-                    inputElement: inputRef.current,
+                    inputElement,
                   })}
                 >
                   <SearchInput
-                    ref={inputRef}
+                    ref={setInputElement}
                     autocomplete={autocomplete}
                     autocompleteState={autocompleteState}
                     onClose={() => setOpen(false)}
@@ -416,14 +427,8 @@ function useSearchProps() {
 }
 
 export function Search() {
-  let [modifierKey, setModifierKey] = useState()
+  let modifierKey = useSyncExternalStore(subscribeToPlatform, getModifierKey, getServerModifierKey)
   let {buttonProps, dialogProps} = useSearchProps()
-
-  useEffect(() => {
-    setModifierKey(
-      /(Mac|iPhone|iPod|iPad)/i.test(navigator.platform) ? '⌘' : 'Ctrl '
-    )
-  }, [])
 
   return (
     <div className="hidden lg:block lg:max-w-md lg:flex-auto">

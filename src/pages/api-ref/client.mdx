@@ -4,6 +4,9 @@ export const keywords = 'localzet cluster client api, cluster external api, send
 
 # Client API
 
+В примерах `$clusterSecret` задаётся проверенным общим конфигом из [инструкции установки](/install/install#obschiy-sekret). Не используйте пустые или шаблонные ключи.
+
+
 Client API позволяет внешним приложениям взаимодействовать с Cluster для отправки сообщений клиентам и управления соединениями.
 
 ## Настройка
@@ -12,7 +15,7 @@ Client API позволяет внешним приложениям взаимо
 use localzet\Cluster\Client;
 
 Client::$registerAddress = '127.0.0.1:1236';
-Client::$secretKey = 'your-secret-key-here';
+Client::$secretKey = $clusterSecret;
 Client::$connectTimeout = 3;
 Client::$persistentConnection = false;
 ```
@@ -259,7 +262,7 @@ Client::destoryClient($client_id);
 
 ```php
 <?php
-require_once __DIR__ . '/vendor/autoload.php';
+require_once __DIR__ . '/cluster-config.php';
 
 use localzet\Cluster\Client;
 

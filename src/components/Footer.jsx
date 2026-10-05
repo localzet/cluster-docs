@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Ivan Zorin <creator@localzet.com>
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Source: https://github.com/localzet/cluster-docs
+
 import {forwardRef, Fragment, useState} from 'react'
 import Link from 'next/link'
 import {useRouter} from 'next/router'
@@ -205,17 +209,17 @@ function SmallPrint() {
         <div
             className="flex flex-col items-center justify-between gap-5 border-t border-slate-900/5 pt-8 dark:border-white/5 sm:flex-row">
             <p className="text-xs text-slate-600 dark:text-slate-400">
-                Copyright &copy; {new Date().getFullYear()} <a className="hover:text-sky-600 dark:hover:text-sky-400" href="https://www.localzet.com">Localzet Group</a>. All
-                rights reserved.
+                Copyright &copy; {new Date().getFullYear()} <a className="hover:text-sky-600 dark:hover:text-sky-400" href="https://www.localzet.com">Localzet Group</a>. Ivan Zorin · <a href="mailto:creator@localzet.com">creator@localzet.com</a>.
+                <a href="https://github.com/localzet/cluster-docs/blob/main/LICENSE">AGPL-3.0-or-later</a>.
             </p>
             <div className="flex gap-4">
-                <SocialLink href="https://x.com/localzet_dev" icon={TwitterIcon}>
+                <SocialLink href="https://x.com/localzet" icon={TwitterIcon}>
                     Follow us on Twitter
                 </SocialLink>
-                <SocialLink href="https://github.com/localzet-dev" icon={GitHubIcon}>
+                <SocialLink href="https://github.com/localzet" icon={GitHubIcon}>
                     Follow us on GitHub
                 </SocialLink>
-                <SocialLink href="https://vk.com/localzet_dev" icon={VKIcon}>
+                <SocialLink href="https://vk.com/localzet" icon={VKIcon}>
                     Follow us on VKontakte
                 </SocialLink>
             </div>

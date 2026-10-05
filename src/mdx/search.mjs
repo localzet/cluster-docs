@@ -1,3 +1,7 @@
+// SPDX-FileCopyrightText: 2026 Ivan Zorin <creator@localzet.com>
+// SPDX-License-Identifier: AGPL-3.0-or-later
+// Source: https://github.com/localzet/cluster-docs
+
 import {createLoader} from 'simple-functional-loader'
 import glob from 'fast-glob'
 import {remark} from 'remark'
@@ -44,7 +48,7 @@ function extractSections() {
     }
 }
 
-export default function (nextConfig = {}) {
+export default function withSearch(nextConfig = {}) {
     let cache = new Map()
 
     return Object.assign({}, nextConfig, {
