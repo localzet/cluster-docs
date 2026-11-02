@@ -91,13 +91,13 @@ php start.php status
 Или просмотр файла логов:
 
 ```bash
-tail -f runtime/logs/workerman.log
+tail -f localzet-server.log
 ```
 
 ### Путь к логам
 
 По умолчанию логи сохраняются в:
-- `runtime/logs/` - для каждого процесса отдельный файл
+- `localzet-server.log` — файл журнала сервера рядом с entry-файлом; путь можно задать через `Server::$logFile`.
 
 ## Запуск отдельных компонентов
 
